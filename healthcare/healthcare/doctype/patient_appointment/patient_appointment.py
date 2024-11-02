@@ -47,13 +47,6 @@ class PatientAppointment(Document):
 		self.update_event()
 		self.set_postition_in_queue()
 
-	def on_update(self):
-		if (
-			not frappe.db.get_single_value("Healthcare Settings", "show_payment_popup")
-			or not self.practitioner
-		):
-			update_fee_validity(self)
-
 	def after_insert(self):
 		self.update_prescription_details()
 		self.set_payment_details()
@@ -398,7 +391,14 @@ def invoice_appointment(appointment_name, discount_percentage=0, discount_amount
 	appointment_doc = frappe.get_doc("Patient Appointment", appointment_name)
 	settings = frappe.get_single("Healthcare Settings")
 
-	if settings.enable_free_follow_ups:
+	enable_free_follow_up = (
+        frappe.get_doc("Healthcare Practitioner", appointment_doc.practitioner).enable_free_follow_ups
+        or frappe.get_doc("Medical Department", appointment_doc.department).enable_free_follow_ups
+        or frappe.get_single("Healthcare Settings").enable_free_follow_ups
+    )
+	fee_validity = None
+
+	if enable_free_follow_up:
 		fee_validity = check_fee_validity(appointment_doc)
 
 		if fee_validity and fee_validity.status != "Active":
@@ -467,10 +467,13 @@ def update_fee_validity(appointment):
 		appointment = json.loads(appointment)
 		appointment = frappe.get_doc(appointment)
 
-	if (
-		not frappe.db.get_single_value("Healthcare Settings", "enable_free_follow_ups")
-		or not appointment.practitioner
-	):
+	enable_free_follow_up = (
+        frappe.get_doc("Healthcare Practitioner", appointment.practitioner).enable_free_follow_ups
+        or frappe.get_doc("Medical Department", appointment.department).enable_free_follow_ups
+        or frappe.db.get_single_value("Healthcare Settings", "enable_free_follow_ups")
+    )
+
+	if not enable_free_follow_up or not appointment.practitioner:
 		return
 
 	fee_validity = manage_fee_validity(appointment)

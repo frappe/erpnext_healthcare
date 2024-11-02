@@ -11,7 +11,11 @@
  "engine": "InnoDB",
  "field_order": [
   "department",
-  "patient_care_type"
+  "patient_care_type",
+  "column_break_flal",
+  "enable_free_follow_ups",
+  "max_visits",
+  "valid_days"
  ],
  "fields": [
   {
@@ -30,13 +34,40 @@
    "in_standard_filter": 1,
    "label": "Patient Care Type",
    "options": "Patient Care Type"
+  },
+  {
+   "fieldname": "column_break_flal",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_free_follow_ups",
+   "fieldtype": "Check",
+   "label": "Enable Free Follow-ups"
+  },
+  {
+   "depends_on": "eval:doc.enable_free_follow_ups == 1",
+   "description": "The number of free follow ups (Patient Encounters in valid days) allowed",
+   "fieldname": "max_visits",
+   "fieldtype": "Int",
+   "label": "Number of Patient Encounters in Valid Days",
+   "mandatory_depends_on": "eval:doc.enable_free_follow_ups == 1"
+  },
+  {
+   "depends_on": "eval:doc.enable_free_follow_ups == 1",
+   "description": "Time period (Valid number of days) for free consultations",
+   "fieldname": "valid_days",
+   "fieldtype": "Int",
+   "label": "Valid Number of Days",
+   "mandatory_depends_on": "eval:doc.enable_free_follow_ups == 1"
   }
  ],
  "links": [],
- "modified": "2021-03-14 20:34:43.328918",
+ "modified": "2024-11-02 13:54:08.969318",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Medical Department",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
@@ -87,6 +118,7 @@
  "search_fields": "department",
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "title_field": "department",
  "track_changes": 1
 }

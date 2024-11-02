@@ -26,6 +26,33 @@ class FeeValidity(Document):
 def create_fee_validity(appointment):
 	if patient_has_validity(appointment):
 		return
+	
+	practitioner_doc = frappe.get_doc("Healthcare Practitioner", appointment.practitioner)
+	department_doc = frappe.get_doc("Medical Department", appointment.department)
+	settings = frappe.get_single("Healthcare Settings")
+    
+	enable_free_follow_up = (
+        practitioner_doc.enable_free_follow_ups
+        or department_doc.enable_free_follow_ups
+        or settings.enable_free_follow_ups
+    )
+
+	if enable_free_follow_up:
+		max_visits = (
+            practitioner_doc.max_visits
+            or department_doc.max_visits
+            or settings.max_visits
+            or 1
+        )
+		valid_days = (
+            practitioner_doc.valid_days
+            or department_doc.valid_days
+            or settings.valid_days
+            or 1
+        )
+	else:
+		max_visits = 1
+		valid_days = 1
 
 	fee_validity = frappe.new_doc("Fee Validity")
 	fee_validity.practitioner = appointment.practitioner
@@ -35,8 +62,8 @@ def create_fee_validity(appointment):
 	fee_validity.sales_invoice_ref = frappe.db.get_value(
 		"Sales Invoice Item", {"reference_dn": appointment.name}, "parent"
 	)
-	fee_validity.max_visits = frappe.db.get_single_value("Healthcare Settings", "max_visits") or 1
-	valid_days = frappe.db.get_single_value("Healthcare Settings", "valid_days") or 1
+	fee_validity.max_visits = max_visits
+	valid_days = valid_days
 	fee_validity.visited = 0
 	fee_validity.start_date = getdate(appointment.appointment_date)
 	fee_validity.valid_till = getdate(appointment.appointment_date) + datetime.timedelta(
@@ -63,12 +90,17 @@ def patient_has_validity(appointment):
 
 @frappe.whitelist()
 def check_fee_validity(appointment, date=None, practitioner=None):
-	if not frappe.db.get_single_value("Healthcare Settings", "enable_free_follow_ups"):
-		return
-
 	if isinstance(appointment, str):
 		appointment = json.loads(appointment)
 		appointment = frappe.get_doc(appointment)
+
+	enable_free_follow_up = (
+        frappe.get_doc("Healthcare Practitioner", appointment.practitioner).enable_free_follow_ups
+        or frappe.get_doc("Medical Department", appointment.department).enable_free_follow_ups
+        or frappe.db.get_single_value("Healthcare Settings", "enable_free_follow_ups")
+    )
+	if not enable_free_follow_up:
+		return
 
 	date = getdate(date) if date else appointment.appointment_date
 
@@ -82,12 +114,12 @@ def check_fee_validity(appointment, date=None, practitioner=None):
 		filters["status"] = "Active"
 	else:
 		filters["patient_appointment"] = appointment.name
-
+	
 	validity = frappe.db.exists(
 		"Fee Validity",
 		filters,
 	)
-
+	
 	if not validity:
 		# return valid fee validity when rescheduling appointment
 		if appointment.get("__islocal"):
@@ -103,9 +135,13 @@ def check_fee_validity(appointment, date=None, practitioner=None):
 
 
 def manage_fee_validity(appointment):
-	free_follow_ups = frappe.db.get_single_value("Healthcare Settings", "enable_free_follow_ups")
+	enable_free_follow_up = (
+        frappe.get_doc("Healthcare Practitioner", appointment.practitioner).enable_free_follow_ups
+        or frappe.get_doc("Medical Department", appointment.department).enable_free_follow_ups
+        or frappe.db.get_single_value("Healthcare Settings", "enable_free_follow_ups")
+    )
 	# Update fee validity dates when rescheduling an invoiced appointment
-	if free_follow_ups:
+	if enable_free_follow_up:
 		invoiced_fee_validity = frappe.db.exists(
 			"Fee Validity", {"patient_appointment": appointment.name}
 		)

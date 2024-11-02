@@ -87,9 +87,12 @@ def get_appointments_to_invoice(patient, company):
 				)
 		# Consultation Appointments, should check fee validity
 		else:
-			if frappe.db.get_single_value(
-				"Healthcare Settings", "enable_free_follow_ups"
-			) and frappe.db.exists("Fee Validity Reference", {"appointment": appointment.name}):
+			enable_free_follow_up = (
+        		frappe.get_doc("Healthcare Practitioner", appointment.practitioner).enable_free_follow_ups
+        		or frappe.get_doc("Medical Department", appointment.department).enable_free_follow_ups
+        		or frappe.db.get_single_value("Healthcare Settings", "enable_free_follow_ups")
+    		)
+			if enable_free_follow_up and frappe.db.exists("Fee Validity Reference", {"appointment": appointment.name}):
 				continue  # Skip invoicing, fee validty present
 			practitioner_charge = 0
 			income_account = None

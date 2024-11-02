@@ -33,6 +33,9 @@
   "appointments",
   "practitioner_schedules",
   "google_calendar",
+  "enable_free_follow_ups",
+  "max_visits",
+  "valid_days",
   "charges",
   "op_consulting_charge_item",
   "op_consulting_charge",
@@ -353,11 +356,33 @@
    "fieldtype": "Link",
    "label": "Supplier",
    "options": "Supplier"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_free_follow_ups",
+   "fieldtype": "Check",
+   "label": "Enable Free Follow-ups"
+  },
+  {
+   "depends_on": "eval:doc.enable_free_follow_ups == 1",
+   "description": "The number of free follow ups (Patient Encounters in valid days) allowed",
+   "fieldname": "max_visits",
+   "fieldtype": "Int",
+   "label": "Number of Patient Encounters in Valid Days",
+   "mandatory_depends_on": "eval:doc.enable_free_follow_ups == 1"
+  },
+  {
+   "depends_on": "eval:doc.enable_free_follow_ups == 1",
+   "description": "Time period (Valid number of days) for free consultations",
+   "fieldname": "valid_days",
+   "fieldtype": "Int",
+   "label": "Valid Number of Days",
+   "mandatory_depends_on": "eval:doc.enable_free_follow_ups == 1"
   }
  ],
  "image_field": "image",
  "links": [],
- "modified": "2023-03-04 18:33:25.753648",
+ "modified": "2024-11-02 13:49:01.363516",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Practitioner",
