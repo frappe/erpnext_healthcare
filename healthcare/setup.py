@@ -984,6 +984,15 @@ def get_patient_history_config():
 				{"label": "Total Orders", "fieldname": "total_orders", "fieldtype": "Float"},
 			],
 		),
+		"Observation": (
+			"posting_date",
+			[
+				{"label": "Observation Template", "fieldname": "observation_template", "fieldtype": "Link"},
+				{"label": "Posting Date", "fieldname": "posting_date", "fieldtype": "Date"},
+				{"label": "Status", "fieldname": "status", "fieldtype": "Select"},
+				{"label": "Time of Result", "fieldname": "time_of_result", "fieldtype": "Datetime"},
+			],
+		),
 	}
 
 
