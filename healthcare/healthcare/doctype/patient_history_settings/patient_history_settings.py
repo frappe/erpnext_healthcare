@@ -9,7 +9,9 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cint, cstr
+from frappe.utils.formatters import format_value
 
+from healthcare.healthcare.doctype.observation.observation import get_observation_details
 from healthcare.healthcare.page.patient_history.patient_history import get_patient_history_doctypes
 
 
@@ -79,31 +81,47 @@ def create_medical_record(doc, method=None):
 	if not medical_record_required:
 		return
 
-	if frappe.db.exists("Patient Medical Record", {"reference_name": doc.name}):
+	reference = doc.name
+	if doc.doctype == "Observation":
+		if doc.reference_docname or doc.sales_invoice:
+			ref_docname = doc.reference_docname
+			if doc.sales_invoice:
+				ref_docname = doc.sales_invoice
+
+			reference = frappe.db.exists("Diagnostic Report", {"docname": ref_docname})
+
+	if frappe.db.exists("Patient Medical Record", {"reference_name": reference}):
+		if doc.doctype == "Observation" and reference:
+			update_medical_record(doc, reference=reference)
 		return
 
-	subject = set_subject_field(doc)
+	subject = set_subject_field(doc, reference)
 	date_field = get_date_field(doc.doctype)
 	medical_record = frappe.new_doc("Patient Medical Record")
 	medical_record.patient = doc.patient
 	medical_record.subject = subject
 	medical_record.status = "Open"
 	medical_record.communication_date = doc.get(date_field)
-	medical_record.reference_doctype = doc.doctype
-	medical_record.reference_name = doc.name
+	medical_record.reference_doctype = (
+		doc.doctype if doc.doctype != "Observation" else "Diagnostic Report"
+	)
+	medical_record.reference_name = doc.name if doc.doctype != "Observation" else reference
 	medical_record.reference_owner = doc.owner
 	medical_record.save(ignore_permissions=True)
 
 
-def update_medical_record(doc, method=None):
+def update_medical_record(doc, method=None, reference=None):
 	medical_record_required = validate_medical_record_required(doc)
 	if not medical_record_required:
 		return
 
-	medical_record_id = frappe.db.exists("Patient Medical Record", {"reference_name": doc.name})
+	medical_record_id = frappe.db.exists(
+		"Patient Medical Record",
+		{"reference_name": reference if doc.doctype == "Observation" else doc.name},
+	)
 
 	if medical_record_id:
-		subject = set_subject_field(doc)
+		subject = set_subject_field(doc, reference)
 		frappe.db.set_value("Patient Medical Record", medical_record_id, "subject", subject)
 	else:
 		create_medical_record(doc)
@@ -119,25 +137,27 @@ def delete_medical_record(doc, method=None):
 		frappe.delete_doc("Patient Medical Record", record, force=1)
 
 
-def set_subject_field(doc):
-	from frappe.utils.formatters import format_value
-
+def set_subject_field(doc, reference=None):
 	meta = frappe.get_meta(doc.doctype)
 	subject = ""
 	patient_history_fields = get_patient_history_fields(doc)
-
-	for entry in patient_history_fields:
-		fieldname = entry.get("fieldname")
-		if entry.get("fieldtype") == "Table" and doc.get(fieldname):
-			formatted_value = get_formatted_value_for_table_field(
-				doc.get(fieldname), meta.get_field(fieldname)
-			)
-			subject += frappe.bold(_(entry.get("label")) + ":") + "<br>" + cstr(formatted_value) + "<br>"
-
+	if doc.doctype == "Observation":
+		if doc.reference_docname or doc.sales_invoice:
+			subject = get_observation_subject_and_ref(patient_history_fields, reference, meta)
 		else:
-			if doc.get(fieldname):
-				formatted_value = format_value(doc.get(fieldname), meta.get_field(fieldname), doc)
-				subject += frappe.bold(_(entry.get("label")) + ":") + cstr(formatted_value) + "<br>"
+			return
+	else:
+		for entry in patient_history_fields:
+			fieldname = entry.get("fieldname")
+			if entry.get("fieldtype") == "Table" and doc.get(fieldname):
+				formatted_value = get_formatted_value_for_table_field(
+					doc.get(fieldname), meta.get_field(fieldname)
+				)
+				subject += frappe.bold(_(entry.get("label")) + ":") + "<br>" + cstr(formatted_value) + "<br>"
+			else:
+				if doc.get(fieldname):
+					formatted_value = format_value(doc.get(fieldname), meta.get_field(fieldname), doc)
+					subject += frappe.bold(_(entry.get("label")) + ":") + cstr(formatted_value) + "<br>"
 
 	return subject
 
@@ -213,3 +233,74 @@ def get_module(doc):
 		module = frappe.db.get_value("DocType", doc.doctype, "module")
 
 	return module
+
+
+def get_observation_subject_and_ref(patient_history_fields, reference, meta):
+	if not reference:
+		return
+
+	obs_data = get_observation_details(reference)
+
+	subject = ""
+	for entry in obs_data[0]:
+		parent_obs = entry.get("observation")
+
+		if entry.get("has_component"):
+			formatted_value = get_formatted_value_for_observations(
+				entry.get(parent_obs), patient_history_fields, meta
+			)
+			subject += f"Observation: {parent_obs} <br> {cstr(formatted_value)}<br>"
+		else:
+			formatted_value = get_formatted_value_for_observations([entry], patient_history_fields, meta)
+			subject += f"Observation: {parent_obs.get('name')} <br> {cstr(formatted_value)}<br>"
+
+	return subject
+
+
+def get_formatted_value_for_observations(items, patient_history_fields, meta):
+	result_fields = [
+		"result_boolean",
+		"result_data",
+		"result_text",
+		"result_float",
+		"result_select",
+	]
+	table_head = ""
+	table_row = ""
+	html = ""
+	create_head = True
+	for item in items:
+		obs_details = item.get("observation")
+		table_row += "<tr>"
+		for key in patient_history_fields:
+			label, fieldname = key.get("label"), key.get("fieldname")
+			if create_head:
+				table_head += f"<td>{label} </td>"
+			if obs_details.get(fieldname):
+				if key.get("fieldtype") == "Datetime":
+					formatted_value = format_value(obs_details.get(fieldname), meta.get_field(fieldname))
+					table_row += f"<td>{str(formatted_value)}</td>"
+				else:
+					table_row += f"<td>{str(obs_details.get(fieldname))}</td>"
+			else:
+				table_row += "<td></td>"
+
+		result = None
+		for field in result_fields:
+			if obs_details.get(field):
+				result = obs_details.get(field)
+				break
+		if create_head:
+			table_head += "<td>Result</td>"
+		if result:
+			table_row += f"<td>{str(result)}</td>"
+
+		create_head = False
+		table_row += "</tr>"
+
+	html += f"""
+		<table class='table table-condensed table-bordered'>
+			{table_head} {table_row}
+		</table>"""
+
+	return html
