@@ -76,15 +76,14 @@ class PatientAppointment(Document):
 
 		# If appointment is created for today set status as Open else Scheduled
 		if appointment_date == today:
-			if self.status not in ["Checked In", "Checked Out"]:
+			if self.status not in ["Checked In", "Checked Out", "Open", "Confirmed"]:
 				self.status = "Open"
 
-		elif appointment_date > today:
+		elif appointment_date > today and self.status not in ["Scheduled", "Confirmed"]:
 			self.status = "Scheduled"
 
-		elif appointment_date < today:
-			if self.status == "Scheduled":
-				self.status = "No Show"
+		elif appointment_date < today and self.status != "No Show":
+			self.status = "No Show"
 
 	def validate_overlaps(self):
 		if self.appointment_based_on_check_in:
@@ -896,7 +895,7 @@ def get_prescribed_therapies(patient):
 def update_appointment_status():
 	# update the status of appointments daily
 	appointments = frappe.get_all(
-		"Patient Appointment", {"status": ("not in", ["Closed", "Cancelled"])}
+		"Patient Appointment", {"status": ("not in", ["Closed", "Cancelled", "Confirmed"])}
 	)
 
 	for appointment in appointments:
