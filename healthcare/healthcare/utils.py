@@ -40,6 +40,7 @@ def get_healthcare_services_to_invoice(patient, customer, company, link_customer
 		items_to_invoice += get_therapy_sessions_to_invoice(patient, company)
 		items_to_invoice += get_service_requests_to_invoice(patient, company)
 		items_to_invoice += get_observations_to_invoice(patient, company)
+		items_to_invoice += get_package_subscriptions_to_invoice(patient, company)
 		validate_customer_created(patient, customer, link_customer)
 		return items_to_invoice
 
@@ -436,6 +437,37 @@ def get_service_requests_to_invoice(patient, company):
 	return orders_to_invoice
 
 
+def get_package_subscriptions_to_invoice(patient, company):
+	subscriptions_to_invoice = []
+	subscriptions = frappe.db.get_all(
+		"Package Subscription",
+		fields=["name", "healthcare_package"],
+		filters={
+			"patient": patient.name,
+			"company": company,
+			"invoiced": False,
+			"docstatus": 1,
+		},
+	)
+	for sub in subscriptions:
+		subscription_doc = frappe.get_doc("Package Subscription", sub.name)
+		item, item_wise_invoicing = frappe.get_cached_value(
+			"Healthcare Package", sub.healthcare_package, ["item", "item_wise_invoicing"]
+		)
+		if not item_wise_invoicing:
+			subscriptions_to_invoice.append(
+				{"reference_type": "Package Subscription", "reference_name": sub.name, "service": item}
+			)
+		else:
+			for item in subscription_doc.package_details:
+				if not item.invoiced:
+					subscriptions_to_invoice.append(
+						{"reference_type": item.doctype, "reference_name": item.name, "service": item.item_code}
+					)
+
+	return subscriptions_to_invoice
+
+
 @frappe.whitelist()
 def get_appointment_billing_item_and_rate(doc):
 	if isinstance(doc, str):
@@ -663,6 +695,15 @@ def set_invoiced(item, method, ref_invoice=None):
 				"Lab Test Template": "Lab Test"
 				# 'Healthcare Service Unit': 'Inpatient Occupancy'
 			}
+	elif item.reference_dt == "Healthcare Package Item":
+		frappe.db.set_value(item.reference_dt, item.reference_dn, "invoiced", invoiced)
+
+		package_subsription = frappe.get_cached_value(item.reference_dt, item.reference_dn, "parent")
+		subsription_doc = frappe.get_doc("Package Subscription", package_subsription)
+		if any(item.get("invoiced") == 0 for item in subsription_doc.package_details):
+			frappe.db.set_value("Package Subscription", package_subsription, "invoiced", 0)
+		else:
+			frappe.db.set_value("Package Subscription", package_subsription, "invoiced", 1)
 
 
 def validate_invoiced_on_submit(item):
