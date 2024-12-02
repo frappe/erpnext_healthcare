@@ -11,12 +11,12 @@ def docs_link_exists(body):
 		for word in line.split():
 			if word.startswith("http") and uri_validator(word):
 				parsed_url = urlparse(word)
-				if parsed_url.netloc == "frappehealth.com" and parsed_url.path.startswith("/docs"):
+				if parsed_url.netloc == "marley.frappe.cloud" and parsed_url.path.startswith("/wiki"):
 					return True
 
 if __name__ == "__main__":
 	pr = sys.argv[1]
-	response = requests.get("https://api.github.com/repos/frappe/health/pulls/{}".format(pr))
+	response = requests.get("https://api.github.com/repos/earthians/marley/pulls/{}".format(pr))
 
 	if response.ok:
 		payload = response.json()
