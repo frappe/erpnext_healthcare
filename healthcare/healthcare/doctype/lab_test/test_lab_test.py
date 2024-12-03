@@ -49,9 +49,7 @@ class TestLabTest(IntegrationTestCase):
 		self.assertRaises(frappe.ValidationError, lab_test.submit)
 
 	def test_sample_collection(self):
-		frappe.db.set_value(
-			"Healthcare Settings", "Healthcare Settings", "create_sample_collection_for_lab_test", 1
-		)
+		frappe.db.set_single_value("Healthcare Settings", "create_sample_collection_for_lab_test", 1)
 		lab_template = create_lab_test_template()
 
 		lab_test = create_lab_test(lab_template)
@@ -63,9 +61,7 @@ class TestLabTest(IntegrationTestCase):
 		# check sample collection created
 		self.assertTrue(frappe.db.exists("Sample Collection", {"sample": lab_template.sample}))
 
-		frappe.db.set_value(
-			"Healthcare Settings", "Healthcare Settings", "create_sample_collection_for_lab_test", 0
-		)
+		frappe.db.set_single_value("Healthcare Settings", "create_sample_collection_for_lab_test", 0)
 		lab_test = create_lab_test(lab_template)
 		lab_test.descriptive_test_items[0].result_value = 12
 		lab_test.descriptive_test_items[1].result_value = 1
