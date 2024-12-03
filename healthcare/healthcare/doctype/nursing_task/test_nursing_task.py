@@ -58,6 +58,8 @@ class TestNursingTask(IntegrationTestCase):
 		lab_test.descriptive_test_items[2].result_value = 2.3
 		lab_test.save()
 
+		start_nusing_tasks(lab_test)
+
 		self.assertRaises(frappe.ValidationError, lab_test.submit)
 
 		complete_nusing_tasks(lab_test)
@@ -70,6 +72,8 @@ class TestNursingTask(IntegrationTestCase):
 		procedure_template.save()
 
 		procedure = create_procedure(procedure_template, self.patient, self.practitioner)
+		start_nusing_tasks(procedure)
+
 		self.assertRaises(frappe.ValidationError, procedure.start_procedure)
 
 		complete_nusing_tasks(procedure)
@@ -86,6 +90,7 @@ class TestNursingTask(IntegrationTestCase):
 		NursingTask.create_nursing_tasks_from_template(
 			ip_record.admission_nursing_checklist_template, ip_record, start_time=now_datetime()
 		)
+		start_nusing_tasks(ip_record)
 
 		service_unit = get_healthcare_service_unit()
 		kwargs = {
@@ -103,6 +108,7 @@ class TestNursingTask(IntegrationTestCase):
 		NursingTask.create_nursing_tasks_from_template(
 			ip_record.admission_nursing_checklist_template, ip_record, start_time=now_datetime()
 		)
+		start_nusing_tasks(ip_record)
 
 		self.assertRaises(frappe.ValidationError, discharge_patient, inpatient_record=ip_record)
 
@@ -116,11 +122,26 @@ class TestNursingTask(IntegrationTestCase):
 
 		therapy_plan = create_therapy_plan()
 		therapy_session = create_therapy_session(self.patient, therapy_type.name, therapy_plan.name)
+		start_nusing_tasks(therapy_session)
 
 		self.assertRaises(frappe.ValidationError, therapy_session.submit)
 
 		complete_nusing_tasks(therapy_session)
 		therapy_session.submit()
+
+
+def start_nusing_tasks(document):
+	filters = {
+		"reference_name": document.name,
+		"mandatory": 1,
+		"status": ["not in", ["Completed", "Cancelled"]],
+	}
+	tasks = frappe.get_all("Nursing Task", filters=filters)
+	for task_name in tasks:
+		task = frappe.get_doc("Nursing Task", task_name)
+		task.submit()
+		task.status = "In Progress"  # should set task_start_time
+		task.save()
 
 
 def complete_nusing_tasks(document):
