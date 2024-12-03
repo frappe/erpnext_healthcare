@@ -79,7 +79,8 @@ class TestNursingTask(IntegrationTestCase):
 		complete_nusing_tasks(procedure)
 		procedure.start_procedure()
 
-	def test_admit_inpatient_should_validate_pending_nursing_tasks(self):
+	def test_admit_discharge_inpatient_should_validate_pending_nursing_tasks(self):
+		"""nursing tasks on admit and discharge of same ip_record"""
 		self.settings.allow_discharge_despite_unbilled_services = 1
 		self.settings.save()
 
