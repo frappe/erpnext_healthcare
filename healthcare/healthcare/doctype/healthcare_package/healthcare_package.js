@@ -1,7 +1,7 @@
 // Copyright (c) 2024, earthians Health Informatics Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
-let package_docs_filter = ["Item","Clinical Procedure Template", "Observation Template", "Therapy Type"]
+let package_docs_filter = ["Item", "Clinical Procedure Template", "Observation Template", "Therapy Type"]
 
 frappe.ui.form.on("Healthcare Package", {
 	refresh: function (frm) {
@@ -53,7 +53,7 @@ frappe.ui.form.on("Healthcare Package", {
 		frm.via_discount_percentage = true;
 
 		if(frm.doc.discount_percentage && frm.doc.discount_amount) {
-			frm.doc.discount_amount = 0;
+			frm.set_value("discount_amount", 0);
 		}
 
 		let discount_field = frm.doc.apply_discount_on == "Total" ? "total_amount" : "net_total";
@@ -69,13 +69,19 @@ frappe.ui.form.on("Healthcare Package", {
 
 	discount_amount: function (frm) {
 		if (!frm.via_discount_percentage) {
-			frm.doc.additional_discount_percentage = 0;
+			frm.set_value("discount_percentage", 0);
 			let discount_field = frm.doc.apply_discount_on == "Total" ? "total_amount" : "net_total";
 			var total = flt(frm.doc[discount_field]);
 			var discount_percentage = (flt(frm.doc.discount_amount) / total) * 100;
 
 			frm.set_value("discount_percentage", discount_percentage)
 			calculate_total_payable(frm);
+		}
+	},
+
+	package_name: function (frm) {
+		if (frm.doc.package_name && !frm.doc.item_code) {
+			frm.set_value("item_code", frm.doc.package_name);
 		}
 	}
 });
