@@ -8,6 +8,7 @@ from frappe.utils import get_link_to_form
 
 class PackageSubscription(Document):
 	def validate(self):
+		self.get_package_details()
 		if self.total_package_amount:
 			self.outstanding_amount = self.total_package_amount - self.paid_amount
 
