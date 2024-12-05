@@ -20,7 +20,7 @@ frappe.ui.form.on("Package Subscription", {
 	},
 
 	refresh: function (frm) {
-		if (frm.doc.outstanding_amount > 0) {
+		if (frm.doc.outstanding_amount > 0 && frm.doc.docstatus == 1) {
 			frm.add_custom_button(__("Payment Entry"), function() {
 				frappe.call({
 					method: "healthcare.healthcare.doctype.package_subscription.package_subscription.create_payment_entry",
