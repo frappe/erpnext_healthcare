@@ -11,7 +11,6 @@ from frappe.model.document import Document
 from frappe.utils import cint, cstr
 from frappe.utils.formatters import format_value
 
-from healthcare.healthcare.doctype.observation.observation import get_observation_details
 from healthcare.healthcare.page.patient_history.patient_history import get_patient_history_doctypes
 
 
@@ -143,7 +142,10 @@ def set_subject_field(doc, reference=None):
 	patient_history_fields = get_patient_history_fields(doc)
 	if doc.doctype == "Observation":
 		if doc.reference_docname or doc.sales_invoice:
-			subject = get_observation_subject_and_ref(patient_history_fields, reference, meta)
+			doc = frappe.get_doc("Diagnostic Report", reference)
+			subject = frappe.render_template(
+				"healthcare/healthcare/doctype/diagnostic_report/diagnostic_report.html", dict(doc=doc)
+			)
 		else:
 			return
 	else:
@@ -233,74 +235,3 @@ def get_module(doc):
 		module = frappe.db.get_value("DocType", doc.doctype, "module")
 
 	return module
-
-
-def get_observation_subject_and_ref(patient_history_fields, reference, meta):
-	if not reference:
-		return
-
-	obs_data = get_observation_details(reference)
-
-	subject = ""
-	for entry in obs_data[0]:
-		parent_obs = entry.get("observation")
-
-		if entry.get("has_component"):
-			formatted_value = get_formatted_value_for_observations(
-				entry.get(parent_obs), patient_history_fields, meta
-			)
-			subject += f"Observation: {parent_obs} <br> {cstr(formatted_value)}<br>"
-		else:
-			formatted_value = get_formatted_value_for_observations([entry], patient_history_fields, meta)
-			subject += f"Observation: {parent_obs.get('name')} <br> {cstr(formatted_value)}<br>"
-
-	return subject
-
-
-def get_formatted_value_for_observations(items, patient_history_fields, meta):
-	result_fields = [
-		"result_boolean",
-		"result_data",
-		"result_text",
-		"result_float",
-		"result_select",
-	]
-	table_head = ""
-	table_row = ""
-	html = ""
-	create_head = True
-	for item in items:
-		obs_details = item.get("observation")
-		table_row += "<tr>"
-		for key in patient_history_fields:
-			label, fieldname = key.get("label"), key.get("fieldname")
-			if create_head:
-				table_head += f"<td>{label} </td>"
-			if obs_details.get(fieldname):
-				if key.get("fieldtype") == "Datetime":
-					formatted_value = format_value(obs_details.get(fieldname), meta.get_field(fieldname))
-					table_row += f"<td>{str(formatted_value)}</td>"
-				else:
-					table_row += f"<td>{str(obs_details.get(fieldname))}</td>"
-			else:
-				table_row += "<td></td>"
-
-		result = None
-		for field in result_fields:
-			if obs_details.get(field):
-				result = obs_details.get(field)
-				break
-		if create_head:
-			table_head += "<td>Result</td>"
-		if result:
-			table_row += f"<td>{str(result)}</td>"
-
-		create_head = False
-		table_row += "</tr>"
-
-	html += f"""
-		<table class='table table-condensed table-bordered'>
-			{table_head} {table_row}
-		</table>"""
-
-	return html
