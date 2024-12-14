@@ -1,5 +1,9 @@
 {
+<<<<<<< HEAD
 	"branches": ["version-15"],
+=======
+	"branches": ["version-14", "version-15"],
+>>>>>>> d1f28b6 (chore: fix symantic release config)
 	"plugins": [
 		"@semantic-release/commit-analyzer", {
 			"preset": "angular",
