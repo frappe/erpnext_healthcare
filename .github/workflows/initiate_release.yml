@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  stable-release:
+  create-stable-release:
     name: Release
     runs-on: ubuntu-latest
     strategy:
@@ -25,8 +25,8 @@ jobs:
           repo: marley
           title: |-
             "chore: release v${{ matrix.version }}"
-          body: "Automated release."
+          body: "Automated Release."
           base: version-${{ matrix.version }}
           head: version-${{ matrix.version }}-hotfix
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.EARTHIANS_BOT_TOKEN }}
