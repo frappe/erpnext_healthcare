@@ -10,10 +10,10 @@ body:
         Welcome to Marley Health issue tracker! Before creating an issue, please consider the following:
 
         1. This tracker should only be used to report bugs and request features / enhancements to Marley Health
-            - For questions and general support, checkout the [documentation](https://frappehealth.com/docs) or use the [forum](https://discuss.frappe.io/c/healthcare/58) to get inputs from the open source community.
-            - For documentation issues, propose edit on the [documentation site](https://frappehealth.com/docs) directly.
-        2. When making a bug report, make sure you provide all required information. The easier it is for
-           maintainers to reproduce, the faster it'll be fixed.
+            - For questions and general support, checkout the [documentation](https://marley.frappe.cloud/docs) or use the [forum](https://discuss.frappe.io/c/healthcare/58) to search for solutions / get inputs from the open source community.
+            - For documentation issues, propose edit on the [documentation site](https://marley.frappe.cloud/docs) directly.
+            - You can also post in the Telegram group for Marley Health development work: https://t.me/frappehealth
+        2. When making a bug report, make sure you provide all required information. The easier it is for maintainers to reproduce, the faster it'll be fixed.
         3. If you think you know what the reason for the bug is, share it with us. Maybe put in a PR 😉
 
   - type: textarea
@@ -34,13 +34,15 @@ body:
       options:
         - Outpatient Module
         - Inpatient ADT
-        - Laboratory
+        - Diagnostic Module
         - Clinical Procedure
         - Rehab & Physiotherapy
         - Patient History
+        - Code Standards
         - Setup / Configuration
         - Integration with ERPNext modules
         - Regional / Other Integrations
+        - Laboratory (legacy)
     validations:
       required: true
 
@@ -61,10 +63,10 @@ body:
     attributes:
       label: Installation method
       options:
+        - Frappe Cloud
         - docker
         - easy-install
         - manual install
-        - FrappeCloud
     validations:
       required: false
 
@@ -80,7 +82,7 @@ body:
     attributes:
       label: Code of Conduct
       description: |
-        By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/frappe/health/blob/develop/CODE_OF_CONDUCT.md)
+        By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/earthains/marley/blob/develop/CODE_OF_CONDUCT.md)
       options:
         - label: I agree to follow this project's Code of Conduct
           required: true
