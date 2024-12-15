@@ -10,7 +10,7 @@ body:
         Welcome to Marley Health issue tracker! Before submitting a request, please consider the following:
 
         1. This tracker should only be used to report bugs and request features / enhancements to Marley Health
-            - For questions and general support, checkout the [documentation](https://frappehealth.com/docs) or use the [forum](https://discuss.frappe.io/c/healthcare/58) to get inputs from the open source community.
+            - For questions and general support, checkout the [documentation](https://marley.frappe.cloud/docs) or use the [forum](https://discuss.frappe.io/c/healthcare/58) to get inputs from the open source community.
         2. Use the search function before creating a new issue. Duplicates will be closed and directed to
           the original discussion.
         3. When making a feature request, make sure to be as verbose as possible. The better you convey your message, the greater the drive to make it happen.
@@ -20,9 +20,9 @@ body:
 
         If you're in urgent need to a feature, please try the following channels to get paid developments done quickly:
         1. Certified Frappe partners: https://frappe.io/partners
-        2. Healthcare Category on Frappe forum: https://discuss.frappe.io/c/healthcare/58
-        2. Developer community on Frappe forum: https://discuss.frappe.io/c/developers/5
-        3. Telegram group for Marley Health development work: https://t.me/frappehealth
+        2. Telegram group for Marley Health development work: https://t.me/frappehealth
+        3. Healthcare Category on Frappe forum: https://discuss.frappe.io/c/healthcare/58
+        4. Developer community on Frappe forum: https://discuss.frappe.io/c/developers/5
 
   - type: textarea
     id: problem-info
