@@ -62,6 +62,7 @@ jinja = {
 	"methods": [
 		"healthcare.healthcare.doctype.diagnostic_report.diagnostic_report.diagnostic_report_print",
 		"healthcare.healthcare.utils.generate_barcodes",
+		"healthcare.healthcare.doctype.observation.observation.get_observations_for_medical_record",
 	]
 }
 
