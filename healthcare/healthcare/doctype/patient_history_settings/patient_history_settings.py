@@ -82,29 +82,23 @@ def create_medical_record(doc, method=None):
 
 	reference = doc.name
 	if doc.doctype == "Observation":
-		if doc.reference_docname or doc.sales_invoice:
-			ref_docname = doc.reference_docname
-			if doc.sales_invoice:
-				ref_docname = doc.sales_invoice
-
-			reference = frappe.db.exists("Diagnostic Report", {"docname": ref_docname})
+		if doc.parent_observation:
+			reference = doc.parent_observation
 
 	if frappe.db.exists("Patient Medical Record", {"reference_name": reference}):
 		if doc.doctype == "Observation" and reference:
 			update_medical_record(doc, reference=reference)
 		return
 
-	subject = set_subject_field(doc, reference)
+	subject = set_subject_field(doc)
 	date_field = get_date_field(doc.doctype)
 	medical_record = frappe.new_doc("Patient Medical Record")
 	medical_record.patient = doc.patient
 	medical_record.subject = subject
 	medical_record.status = "Open"
 	medical_record.communication_date = doc.get(date_field)
-	medical_record.reference_doctype = (
-		doc.doctype if doc.doctype != "Observation" else "Diagnostic Report"
-	)
-	medical_record.reference_name = doc.name if doc.doctype != "Observation" else reference
+	medical_record.reference_doctype = doc.doctype
+	medical_record.reference_name = reference
 	medical_record.reference_owner = doc.owner
 	medical_record.save(ignore_permissions=True)
 
@@ -120,7 +114,7 @@ def update_medical_record(doc, method=None, reference=None):
 	)
 
 	if medical_record_id:
-		subject = set_subject_field(doc, reference)
+		subject = set_subject_field(doc)
 		frappe.db.set_value("Patient Medical Record", medical_record_id, "subject", subject)
 	else:
 		create_medical_record(doc)
@@ -136,18 +130,14 @@ def delete_medical_record(doc, method=None):
 		frappe.delete_doc("Patient Medical Record", record, force=1)
 
 
-def set_subject_field(doc, reference=None):
+def set_subject_field(doc):
 	meta = frappe.get_meta(doc.doctype)
 	subject = ""
 	patient_history_fields = get_patient_history_fields(doc)
 	if doc.doctype == "Observation":
-		if doc.reference_docname or doc.sales_invoice:
-			doc = frappe.get_doc("Diagnostic Report", reference)
-			subject = frappe.render_template(
-				"healthcare/healthcare/doctype/diagnostic_report/diagnostic_report.html", dict(doc=doc)
-			)
-		else:
-			return
+		subject = frappe.render_template(
+			"healthcare/healthcare/doctype/observation/observation.html", dict(doc=doc)
+		)
 	else:
 		for entry in patient_history_fields:
 			fieldname = entry.get("fieldname")
