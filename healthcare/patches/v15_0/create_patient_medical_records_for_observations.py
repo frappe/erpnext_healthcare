@@ -1,21 +1,34 @@
 import frappe
+from frappe.utils import getdate
 
 
 def execute():
-	diagnostic_report = frappe.db.get_all("Diagnostic Report", pluck="name")
+	observations = frappe.db.get_all("Observation", filters={"docstatus": 1}, pluck="name")
 
-	for diag in diagnostic_report:
-		diag_doc = frappe.get_doc("Diagnostic Report", diag)
+	for obs in observations:
+		obs_doc = frappe.get_doc("Observation", obs)
 
 		subject = frappe.render_template(
-			"healthcare/healthcare/doctype/diagnostic_report/diagnostic_report.html", dict(doc=diag_doc)
+			"healthcare/healthcare/doctype/observation/observation.html", dict(doc=obs_doc)
 		)
-		medical_record = frappe.new_doc("Patient Medical Record")
-		medical_record.patient = diag_doc.patient
-		medical_record.subject = subject
-		medical_record.status = "Open"
-		medical_record.communication_date = diag_doc.reference_posting_date
-		medical_record.reference_doctype = "Diagnostic Report"
-		medical_record.reference_name = diag_doc.name
-		medical_record.reference_owner = diag_doc.owner
-		medical_record.save(ignore_permissions=True)
+
+		reference = obs
+		if obs_doc.parent_observation:
+			reference = obs_doc.parent_observation
+
+		exists = frappe.db.exists(
+			"Patient Medical Record", {"reference_doctype": "Observation", "reference_name": reference}
+		)
+
+		if exists:
+			frappe.db.set_value("Patient Medical Record", exists, "subject", subject)
+		else:
+			medical_record = frappe.new_doc("Patient Medical Record")
+			medical_record.patient = obs_doc.patient
+			medical_record.subject = subject
+			medical_record.status = "Open"
+			medical_record.communication_date = getdate(obs_doc.modified)
+			medical_record.reference_doctype = "Observation"
+			medical_record.reference_name = reference
+			medical_record.reference_owner = obs_doc.owner
+			medical_record.save(ignore_permissions=True)

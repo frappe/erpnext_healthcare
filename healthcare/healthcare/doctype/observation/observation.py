@@ -602,3 +602,17 @@ def eval_condition_and_formula(d, data):
 			<br><br> <b>Hint:</b> {4}"""
 		).format(d.parenttype, get_link_to_form(d.parenttype, d.parent), d.idx, err, description)
 		frappe.throw(message, title=_("Error in formula"))
+
+
+def get_observations_for_medical_record(observation, parent_observation=None):
+	if not observation:
+		return
+
+	if parent_observation:
+		obs_doc = frappe.get_doc("Observation", parent_observation)
+	else:
+		obs_doc = frappe.get_doc("Observation", observation)
+
+	out_data, obs_length = aggregate_and_return_observation_data([obs_doc])
+
+	return out_data, obs_length
