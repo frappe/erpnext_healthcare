@@ -125,7 +125,7 @@
 {% if doc.get("name")  %}
     {% set full_data = get_observations_for_medical_record(doc.name, doc.parent_observation) %}
         <div class="observation-report">
-    {% for data in full_data[0] %}
+    {% for data in full_data %}
         {% if not data.get("has_component")  %}
             {% if data.get("observation").get("preferred_display_name")  %}
                 {% set observation_name = data.get("observation").get("preferred_display_name") %}
