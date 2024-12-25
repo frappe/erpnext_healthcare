@@ -192,7 +192,7 @@ def get_child_observations(obs):
 	)
 
 
-def return_child_observation_data_as_dict(child_observations, obs, obs_length):
+def return_child_observation_data_as_dict(child_observations, obs, obs_length=0):
 	obs_list = []
 	has_result = False
 	obs_approved = False
@@ -613,6 +613,25 @@ def get_observations_for_medical_record(observation, parent_observation=None):
 	else:
 		obs_doc = frappe.get_doc("Observation", observation)
 
-	out_data, obs_length = aggregate_and_return_observation_data([obs_doc])
+	obs_doc = obs_doc.as_dict()
+	out_data = []
 
-	return out_data, obs_length
+	if not obs_doc.get("has_component"):
+		if obs_doc.get("permitted_data_type") == "Select" and obs_doc.get("options"):
+			obs_doc["options_list"] = obs_doc.get("options").split("\n")
+
+		if obs_doc.get("observation_template") and obs_doc.get("specimen"):
+			obs_doc["received_time"] = frappe.get_value(
+				"Specimen", obs_doc.get("specimen"), "received_time"
+			)
+
+		out_data.append({"observation": obs_doc})
+
+	else:
+		child_observations = get_child_observations(obs_doc)
+		obs_dict = return_child_observation_data_as_dict(child_observations, obs_doc)
+
+		if len(obs_dict) > 0:
+			out_data.append(obs_dict)
+
+	return out_data
