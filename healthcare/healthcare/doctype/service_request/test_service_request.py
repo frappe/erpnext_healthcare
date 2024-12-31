@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import unittest
 
 import frappe
-from frappe.utils import getdate, nowtime
+from frappe.utils import getdate, nowdate, nowtime
 
 import erpnext
 
@@ -29,6 +29,11 @@ from healthcare.healthcare.doctype.patient_appointment.test_patient_appointment 
 	create_healthcare_docs,
 )
 from healthcare.healthcare.doctype.service_request.service_request import make_clinical_procedure
+from healthcare.healthcare.doctype.therapy_plan.test_therapy_plan import (
+	create_therapy_plan,
+	create_therapy_type,
+)
+from healthcare.healthcare.doctype.therapy_type.test_therapy_type import create_exercise_type
 
 
 class TestServiceRequest(unittest.TestCase):
@@ -37,12 +42,14 @@ class TestServiceRequest(unittest.TestCase):
 		insulin_resistance_template = create_lab_test_template()
 		procedure_template = create_clinical_procedure_template()
 		procedure_template.allow_stock_consumption = 1
+		therapy_type = create_therapy_type()
 		encounter = create_encounter(
 			patient,
 			practitioner,
 			"lab_test_prescription",
 			insulin_resistance_template,
 			procedure_template,
+			therapy_type,
 			submit=True,
 		)
 		self.assertTrue(frappe.db.exists("Service Request", {"order_group": encounter.name}))
@@ -70,6 +77,12 @@ class TestServiceRequest(unittest.TestCase):
 						doc = "Clinical Procedure"
 						template = procedure_template
 						type = "procedure_prescription"
+					elif serv.get("template_dt") == "Therapy Type":
+						test = make_therapy_session(service_request_doc.name)
+						test.submit()
+						doc = "Therapy Session"
+						template = therapy_type
+						type = "therapies"
 
 					# create sales invoice with service request and check service request and lab test is marked as invoiced
 					create_sales_invoice(patient, service_request_doc, template, type)
@@ -117,7 +130,14 @@ class TestServiceRequest(unittest.TestCase):
 
 
 def create_encounter(
-	patient, practitioner, type, template, procedure_template=False, submit=False, obs=False
+	patient,
+	practitioner,
+	type,
+	template,
+	procedure_template=False,
+	therapy_type=False,
+	submit=False,
+	obs=False,
 ):
 	patient_encounter = frappe.new_doc("Patient Encounter")
 	patient_encounter.patient = patient
@@ -140,6 +160,11 @@ def create_encounter(
 		patient_encounter.append(
 			"procedure_prescription",
 			{"procedure": procedure_template.template, "procedure_name": procedure_template.item_code},
+		)
+	if therapy_type:
+		patient_encounter.append(
+			"therapies",
+			{"therapy_type": therapy_type.name, "no_of_sessions": 1},
 		)
 
 	if submit:
@@ -209,6 +234,24 @@ def create_sales_invoice(patient, service_request, template, type):
 				"description": template.description,
 			},
 		)
+	elif type == "therapies":
+		sales_invoice.append(
+			"items",
+			{
+				"qty": 1,
+				"uom": "Nos",
+				"conversion_factor": 1,
+				"income_account": get_income_account(None, "_Test Company"),
+				"rate": template.rate,
+				"amount": template.rate,
+				"reference_dt": service_request.doctype,
+				"reference_dn": service_request.name,
+				"cost_center": erpnext.get_default_cost_center("_Test Company"),
+				"item_code": template.item_code,
+				"item_name": template.item_code,
+				"description": template.description,
+			},
+		)
 
 	sales_invoice.set_missing_values()
 
@@ -223,3 +266,19 @@ def create_observation(patient, service_request, obs_template):
 	observation.observation_template = obs_template
 	observation.insert()
 	return observation
+
+
+def make_therapy_session(service_request):
+	plan = create_therapy_plan()
+
+	start_date = nowdate()
+	therapy_session = frappe.new_doc("Therapy Session")
+	therapy_session.patient = plan.patient
+	therapy_session.therapy_type = "Basic Rehab"
+	therapy_session.therapy_plan = plan.name
+	therapy_session.duration = 1
+	therapy_session.start_date = start_date
+	therapy_session.service_request = service_request
+	therapy_session.save()
+
+	return therapy_session
