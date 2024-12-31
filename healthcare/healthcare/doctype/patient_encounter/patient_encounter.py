@@ -225,6 +225,11 @@ class PatientEncounter(Document):
 					drug.medication_request = order.name
 
 	def get_order_details(self, template_doc, line_item, medication_request=False):
+		qty = 1
+		if line_item.get("doctype") == "Drug Prescription":
+			qty = line_item.get_quantity()
+		elif line_item.get("doctype") == "Therapy Plan Detail":
+			qty = line_item.get("no_of_sessions")
 		order = frappe.get_doc(
 			{
 				"doctype": "Medication Request" if medication_request else "Service Request",
@@ -239,7 +244,7 @@ class PatientEncounter(Document):
 				"sequence": line_item.get("sequence"),
 				"intent": line_item.get("intent"),
 				"priority": line_item.get("priority"),
-				"quantity": line_item.get_quantity() if line_item.get("doctype") == "Drug Prescription" else 1,
+				"quantity": qty,
 				"dosage": line_item.get("dosage"),
 				"dosage_form": line_item.get("dosage_form"),
 				"period": line_item.get("period"),

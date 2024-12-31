@@ -16,9 +16,6 @@ from healthcare.healthcare.doctype.healthcare_settings.healthcare_settings impor
 	get_receivable_account,
 )
 from healthcare.healthcare.doctype.nursing_task.nursing_task import NursingTask
-from healthcare.healthcare.doctype.service_request.service_request import (
-	update_service_request_status,
-)
 from healthcare.healthcare.utils import validate_nursing_tasks
 
 
@@ -29,11 +26,6 @@ class TherapySession(Document):
 		self.set_total_counts()
 
 	def after_insert(self):
-		if self.service_request:
-			update_service_request_status(
-				self.service_request, self.doctype, self.name, "completed-Request Status"
-			)
-
 		self.create_nursing_tasks(post_event=False)
 
 	def on_update(self):
@@ -90,7 +82,12 @@ class TherapySession(Document):
 		self.update_sessions_count_in_therapy_plan()
 
 		if self.service_request:
-			frappe.db.set_value("Service Request", self.service_request, "status", "Completed")
+			status = "active-Request Status"
+			sessions_completed = self.check_sessions_completed()
+			if sessions_completed:
+				status = "completed-Request Status"
+
+			frappe.db.set_value("Service Request", self.service_request, "status", status)
 
 	def create_nursing_tasks(self, post_event=True):
 		template = frappe.db.get_value("Therapy Type", self.therapy_type, "nursing_checklist_template")
@@ -138,7 +135,7 @@ class TherapySession(Document):
 		if self.service_request:
 			therapy_session = frappe.db.exists(
 				"Therapy Session",
-				{"service_request": self.service_request, "docstatus": ["!=", 2]},
+				{"service_request": self.service_request, "docstatus": 0},
 			)
 			if therapy_session:
 				frappe.throw(
@@ -148,6 +145,16 @@ class TherapySession(Document):
 					),
 					title=_("Already Exist"),
 				)
+
+	def check_sessions_completed(self):
+		total_sessions_requested = frappe.db.get_value(
+			"Service Request", self.service_request, "quantity"
+		)
+		sessions = frappe.db.count(
+			"Therapy Session", filters={"docstatus": ["!=", 2], "service_request": self.service_request}
+		)
+
+		return True if total_sessions_requested == sessions else False
 
 
 @frappe.whitelist()

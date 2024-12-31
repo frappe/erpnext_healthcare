@@ -75,18 +75,33 @@ frappe.ui.form.on('Service Request', {
 
 		} else if (frm.doc.template_dt === 'Therapy Type') {
 			frm.add_custom_button(__("Therapy Session"), function() {
-				frappe.db.get_value("Therapy Session", {"service_request": frm.doc.name, "docstatus":["!=", 2]}, "name")
-				.then(r => {
-					if (Object.keys(r.message).length == 0) {
-						frm.trigger('make_therapy_session');
+				frappe.db.get_list("Therapy Session", {
+					filters: {
+						"service_request": frm.doc.name,
+						"docstatus":["!=", 2],
+						"therapy_type": frm.doc.template_dn
+					},
+					fields: ["name"]
+				}).then(response => {
+					if (response.length == frm.doc.quantity) {
+						frappe.set_route("List", "Therapy Session", {
+							service_request: frm.doc.name,
+						});
 					} else {
-						if (r.message && r.message.name) {
-							frappe.set_route("Form", "Therapy Session", r.message.name);
-							frappe.show_alert({
-								message: __(`Therapy Session is already created`),
-								indicator: "info",
-							});
-						}
+						frappe.db.get_value("Therapy Session", {"service_request": frm.doc.name, "docstatus": 0}, "name")
+						.then(r => {
+							if (Object.keys(r.message).length == 0) {
+								frm.trigger('make_therapy_session');
+							} else {
+								if (r.message && r.message.name) {
+									frappe.set_route("Form", "Therapy Session", r.message.name);
+									frappe.show_alert({
+										message: __(`Therapy Session is already created`),
+										indicator: "info",
+									});
+								}
+							}
+						})
 					}
 				})
 			}, __('Create'));

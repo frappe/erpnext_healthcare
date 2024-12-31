@@ -14,9 +14,6 @@ from erpnext.stock.stock_ledger import get_previous_sle
 from healthcare.healthcare.doctype.healthcare_settings.healthcare_settings import get_account
 from healthcare.healthcare.doctype.lab_test.lab_test import create_sample_doc
 from healthcare.healthcare.doctype.nursing_task.nursing_task import NursingTask
-from healthcare.healthcare.doctype.service_request.service_request import (
-	update_service_request_status,
-)
 from healthcare.healthcare.utils import validate_nursing_tasks
 
 
@@ -56,11 +53,6 @@ class ClinicalProcedure(Document):
 			frappe.db.set_value("Service Request", self.service_request, "status", "active-Request Status")
 
 	def after_insert(self):
-		if self.service_request:
-			update_service_request_status(
-				self.service_request, self.doctype, self.name, "completed-Request Status"
-			)
-
 		if self.appointment:
 			frappe.db.set_value("Patient Appointment", self.appointment, "status", "Closed")
 
@@ -75,6 +67,10 @@ class ClinicalProcedure(Document):
 
 	def on_submit(self):
 		self.create_nursing_tasks(post_event=False)
+		if self.service_request:
+			frappe.db.set_value(
+				"Service Request", self.service_request, "status", "completed-Request Status"
+			)
 
 	def create_nursing_tasks(self, post_event=True):
 		if post_event:
