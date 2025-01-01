@@ -1,0 +1,89 @@
+{
+ "actions": [],
+ "allow_copy": 1,
+ "allow_import": 1,
+ "allow_rename": 1,
+ "autoname": "field:sample",
+ "creation": "2016-04-04 17:35:44.823951",
+ "doctype": "DocType",
+ "document_type": "Setup",
+ "engine": "InnoDB",
+ "field_order": [
+  "sample_type",
+  "sample",
+  "container_closure_color",
+  "column_break_0sbu",
+  "sample_uom"
+ ],
+ "fields": [
+  {
+   "fieldname": "sample",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Sample",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "bold": 1,
+   "fieldname": "sample_uom",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "UOM",
+   "options": "Lab Test UOM"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "sample_type",
+   "fieldtype": "Link",
+   "label": "Sample Type",
+   "options": "Sample Type"
+  },
+  {
+   "fieldname": "column_break_0sbu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "container_closure_color",
+   "fieldtype": "Link",
+   "label": "Container Closure Color",
+   "options": "Color"
+  }
+ ],
+ "links": [],
+ "modified": "2023-06-29 12:37:11.086348",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Lab Test Sample",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Healthcare Administrator",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Laboratory User",
+   "share": 1
+  }
+ ],
+ "quick_entry": 1,
+ "restrict_to_domain": "Healthcare",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "sample",
+ "track_changes": 1
+}

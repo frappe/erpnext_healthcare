@@ -1,0 +1,93 @@
+{
+ "actions": [],
+ "allow_copy": 1,
+ "allow_import": 1,
+ "allow_rename": 1,
+ "autoname": "field:diagnosis",
+ "beta": 1,
+ "creation": "2017-02-15 12:23:59.341108",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "diagnosis",
+  "column_break_2",
+  "estimated_duration",
+  "codification",
+  "codification_table"
+ ],
+ "fields": [
+  {
+   "fieldname": "diagnosis",
+   "fieldtype": "Data",
+   "ignore_xss_filter": 1,
+   "in_list_view": 1,
+   "label": "Diagnosis",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "estimated_duration",
+   "fieldtype": "Duration",
+   "hide_seconds": 1,
+   "in_list_view": 1,
+   "label": "Estimated Duration"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+  "fieldname": "codification_table",
+  "fieldtype": "Table",
+  "label": "Medical Codes",
+  "options": "Codification Table"
+ },
+ {
+  "fieldname": "codification",
+  "fieldtype": "Section Break",
+  "label": "Medical Coding"
+ }
+ ],
+ "links": [],
+ "modified": "2021-03-14 20:34:07.440600",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Diagnosis",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Healthcare Administrator",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Physician",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "restrict_to_domain": "Healthcare",
+ "search_fields": "diagnosis",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "diagnosis",
+ "track_changes": 1
+}
