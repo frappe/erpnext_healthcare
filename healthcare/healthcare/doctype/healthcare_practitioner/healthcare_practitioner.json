@@ -113,7 +113,8 @@
    "ignore_user_permissions": 1,
    "in_standard_filter": 1,
    "label": "Medical Department",
-   "options": "Medical Department"
+   "options": "Medical Department",
+   "reqd" : 1
   },
   {
    "fieldname": "column_break_7",
