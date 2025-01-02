@@ -229,6 +229,7 @@ def create_practitioner():
 		practitioner = frappe.new_doc("Healthcare Practitioner")
 		practitioner.first_name = "_Test Healthcare Practitioner"
 		practitioner.gender = "Female"
+		practitioner.department = "Dermatology"
 		practitioner.op_consulting_charge = 500
 		practitioner.inpatient_visit_charge = 500
 		practitioner.save(ignore_permissions=True)
