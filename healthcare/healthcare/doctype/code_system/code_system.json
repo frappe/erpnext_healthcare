@@ -1,0 +1,201 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "autoname": "field:code_system",
+ "beta": 1,
+ "creation": "2017-06-21 13:07:00.463176",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "column_break_seaq",
+  "disabled",
+  "section_break_zyqx",
+  "code_system",
+  "uri",
+  "description",
+  "column_break_ijhv",
+  "status",
+  "version",
+  "is_fhir_defined",
+  "oid",
+  "experimental",
+  "immutable",
+  "complete",
+  "custom"
+ ],
+ "fields": [
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "uri",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "URI",
+   "no_copy": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "oid",
+   "fieldtype": "Data",
+   "label": "OID",
+   "no_copy": 1,
+   "read_only_depends_on": "eval:doc.is_fhir_defined",
+   "unique": 1
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description"
+  },
+  {
+   "fieldname": "column_break_ijhv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "code_system",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Code System",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Disabled",
+   "search_index": 1
+  },
+  {
+   "fieldname": "section_break_zyqx",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "default": "1",
+   "fieldname": "is_fhir_defined",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Is FHIR Defined",
+   "no_copy": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "experimental",
+   "fieldtype": "Check",
+   "label": "Experimental ",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "custom",
+   "fieldtype": "Check",
+   "label": "Custom",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "immutable",
+   "fieldtype": "Check",
+   "label": "Immutable "
+  },
+  {
+   "default": "1",
+   "fieldname": "column_break_seaq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "version",
+   "fieldtype": "Link",
+   "label": "Version",
+   "options": "Code Value",
+   "search_index": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Link",
+   "label": "Status",
+   "options": "Code Value"
+  },
+  {
+   "default": "0",
+   "fieldname": "complete",
+   "fieldtype": "Check",
+   "label": "Complete"
+  }
+ ],
+ "links": [
+  {
+   "link_doctype": "Code Value",
+   "link_fieldname": "code_system"
+  }
+ ],
+ "modified": "2024-01-08 16:44:38.512275",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Code System",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "import": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Physician",
+   "share": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "import": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Nursing User",
+   "share": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "import": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Healthcare Administrator",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "import": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "restrict_to_domain": "Healthcare",
+ "search_fields": "code_system, uri",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "code_system",
+ "track_changes": 1
+}
