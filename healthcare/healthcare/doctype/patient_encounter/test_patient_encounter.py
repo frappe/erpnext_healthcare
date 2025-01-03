@@ -37,6 +37,7 @@ class TestPatientEncounter(IntegrationTestCase):
 				"doctype": "Healthcare Practitioner",
 				"first_name": "Doc",
 				"sex": "MALE",
+				"department": "Dermatology" 
 			}
 		).insert()
 		try:
