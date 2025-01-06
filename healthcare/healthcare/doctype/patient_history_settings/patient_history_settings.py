@@ -9,6 +9,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cint, cstr
+from frappe.utils.formatters import format_value
 
 from healthcare.healthcare.page.patient_history.patient_history import get_patient_history_doctypes
 
@@ -79,7 +80,14 @@ def create_medical_record(doc, method=None):
 	if not medical_record_required:
 		return
 
-	if frappe.db.exists("Patient Medical Record", {"reference_name": doc.name}):
+	reference = doc.name
+	if doc.doctype == "Observation":
+		if doc.parent_observation:
+			reference = doc.parent_observation
+
+	if frappe.db.exists("Patient Medical Record", {"reference_name": reference}):
+		if doc.doctype == "Observation" and reference:
+			update_medical_record(doc, reference=reference)
 		return
 
 	subject = set_subject_field(doc)
@@ -90,17 +98,20 @@ def create_medical_record(doc, method=None):
 	medical_record.status = "Open"
 	medical_record.communication_date = doc.get(date_field)
 	medical_record.reference_doctype = doc.doctype
-	medical_record.reference_name = doc.name
+	medical_record.reference_name = reference
 	medical_record.reference_owner = doc.owner
 	medical_record.save(ignore_permissions=True)
 
 
-def update_medical_record(doc, method=None):
+def update_medical_record(doc, method=None, reference=None):
 	medical_record_required = validate_medical_record_required(doc)
 	if not medical_record_required:
 		return
 
-	medical_record_id = frappe.db.exists("Patient Medical Record", {"reference_name": doc.name})
+	medical_record_id = frappe.db.exists(
+		"Patient Medical Record",
+		{"reference_name": reference if doc.doctype == "Observation" else doc.name},
+	)
 
 	if medical_record_id:
 		subject = set_subject_field(doc)
@@ -120,24 +131,25 @@ def delete_medical_record(doc, method=None):
 
 
 def set_subject_field(doc):
-	from frappe.utils.formatters import format_value
-
 	meta = frappe.get_meta(doc.doctype)
 	subject = ""
 	patient_history_fields = get_patient_history_fields(doc)
-
-	for entry in patient_history_fields:
-		fieldname = entry.get("fieldname")
-		if entry.get("fieldtype") == "Table" and doc.get(fieldname):
-			formatted_value = get_formatted_value_for_table_field(
-				doc.get(fieldname), meta.get_field(fieldname)
-			)
-			subject += frappe.bold(_(entry.get("label")) + ":") + "<br>" + cstr(formatted_value) + "<br>"
-
-		else:
-			if doc.get(fieldname):
-				formatted_value = format_value(doc.get(fieldname), meta.get_field(fieldname), doc)
-				subject += frappe.bold(_(entry.get("label")) + ":") + cstr(formatted_value) + "<br>"
+	if doc.doctype == "Observation":
+		subject = frappe.render_template(
+			"healthcare/healthcare/doctype/observation/observation.html", dict(doc=doc)
+		)
+	else:
+		for entry in patient_history_fields:
+			fieldname = entry.get("fieldname")
+			if entry.get("fieldtype") == "Table" and doc.get(fieldname):
+				formatted_value = get_formatted_value_for_table_field(
+					doc.get(fieldname), meta.get_field(fieldname)
+				)
+				subject += frappe.bold(_(entry.get("label")) + ":") + "<br>" + cstr(formatted_value) + "<br>"
+			else:
+				if doc.get(fieldname):
+					formatted_value = format_value(doc.get(fieldname), meta.get_field(fieldname), doc)
+					subject += frappe.bold(_(entry.get("label")) + ":") + cstr(formatted_value) + "<br>"
 
 	return subject
 

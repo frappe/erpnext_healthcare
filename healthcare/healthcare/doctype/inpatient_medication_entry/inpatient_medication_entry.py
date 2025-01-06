@@ -311,7 +311,7 @@ def get_drug_shortage_map(medication_orders, warehouse):
 
 	drug_shortage = dict()
 	for drug, required_qty in drug_requirement.items():
-		available_qty = get_latest_stock_qty(drug, warehouse)
+		available_qty = get_latest_stock_qty(drug, warehouse) or 0
 		if flt(required_qty) > flt(available_qty):
 			drug_shortage[drug] = flt(flt(required_qty) - flt(available_qty))
 

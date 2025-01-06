@@ -106,7 +106,7 @@
    "in_filter": 1,
    "in_list_view": 1,
    "label": "Status",
-   "options": "\nScheduled\nOpen\nChecked In\nChecked Out\nClosed\nCancelled\nNo Show",
+   "options": "\nScheduled\nOpen\nConfirmed\nChecked In\nChecked Out\nClosed\nCancelled\nNo Show",
    "read_only": 1,
    "search_index": 1
   },
@@ -416,16 +416,16 @@
    "fieldtype": "Column Break"
   },
   {
-    "fieldname": "service_request",
-    "fieldtype": "Link",
-    "label": "Service Request",
-    "options": "Service Request",
-    "read_only": 1,
-    "search_index": 1
+   "fieldname": "service_request",
+   "fieldtype": "Link",
+   "label": "Service Request",
+   "options": "Service Request",
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "links": [],
- "modified": "2023-06-10 13:39:03.455568",
+ "modified": "2024-11-20 08:21:29.729408",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Appointment",

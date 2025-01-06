@@ -81,7 +81,7 @@ frappe.ui.form.on('Patient Appointment', {
 			}, __('View'));
 		}
 
-		if (["Open", "Checked In"].includes(frm.doc.status) || (frm.doc.status == 'Scheduled' && !frm.doc.__islocal)) {
+		if (["Open", "Checked In", "Confirmed"].includes(frm.doc.status) || (frm.doc.status == "Scheduled" && !frm.doc.__islocal)) {
 			frm.add_custom_button(__('Cancel'), function() {
 				update_status(frm, 'Cancelled');
 			});
@@ -115,10 +115,17 @@ frappe.ui.form.on('Patient Appointment', {
 			frm.add_custom_button(__('Vital Signs'), function() {
 				create_vital_signs(frm);
 			}, __('Create'));
+
+			if (["Open", "Scheduled"].includes(frm.doc.status)) {
+				frm.add_custom_button(__("Confirm"), function() {
+					frm.set_value("status", "Confirmed");
+					frm.save();
+				}, __("Status"));
+			}
 		}
 
-		if (!frm.doc.__islocal && frm.doc.status=="Open" && frm.doc.appointment_based_on_check_in) {
-			frm.add_custom_button(__('Check In'), () => {
+		if (!frm.doc.__islocal && ["Open", "Confirmed"].includes(frm.doc.status) && frm.doc.appointment_based_on_check_in) {
+			frm.add_custom_button(__("Check In"), () => {
 				frm.set_value("status", "Checked In");
 				frm.save();
 			});

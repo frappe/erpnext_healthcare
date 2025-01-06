@@ -14,16 +14,12 @@ from erpnext import get_default_company
 
 class NursingTask(Document):
 	def before_insert(self):
-		# set requested start / end
 		self.set_task_schedule()
-
 		self.title = "{} - {}".format(_(self.patient), _(self.activity))
-
 		self.age = frappe.get_doc("Patient", self.patient).get_age()
 
 	def validate(self):
 		if self.status == "Requested":
-			# auto submit if status is Requested
 			self.docstatus = 1
 
 	def on_submit(self):
@@ -47,10 +43,11 @@ class NursingTask(Document):
 				self.db_set("task_start_time", now_datetime())
 
 		elif self.status == "Completed":
+			task_end_time = now_datetime()
 			self.db_set(
 				{
-					"task_end_time": now_datetime(),
-					"task_duration": time_diff_in_seconds(self.task_end_time, self.task_start_time),
+					"task_end_time": task_end_time,
+					"task_duration": time_diff_in_seconds(task_end_time, self.task_start_time),
 				}
 			)
 
