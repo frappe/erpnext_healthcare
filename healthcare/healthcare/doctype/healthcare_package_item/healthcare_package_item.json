@@ -1,0 +1,148 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-10-16 11:14:49.649656",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "package_item_type",
+  "package_item",
+  "item_code",
+  "column_break_dyhx",
+  "no_of_sessions",
+  "booked_sessions",
+  "invoiced",
+  "section_break_bbtg",
+  "rate",
+  "column_break_doch",
+  "amount",
+  "amount_with_discount",
+  "discount_details_section",
+  "discount_percentage",
+  "column_break_nnxm",
+  "discount_amount"
+ ],
+ "fields": [
+  {
+   "fieldname": "package_item_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Package Item Type",
+   "options": "DocType",
+   "reqd": 1
+  },
+  {
+   "fieldname": "package_item",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Package Item",
+   "options": "package_item_type",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "rate",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Rate",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "no_of_sessions",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "No of Sessions",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "discount_percentage",
+   "fieldtype": "Percent",
+   "label": "Discount Percentage"
+  },
+  {
+   "default": "0",
+   "fieldname": "discount_amount",
+   "fieldtype": "Currency",
+   "label": "Discount Amount"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "eval: doc.discount_percentage || doc.discount_amount",
+   "depends_on": "eval: doc.parenttype == \"Healthcare Package\"",
+   "fieldname": "discount_details_section",
+   "fieldtype": "Section Break",
+   "label": "Discount Details"
+  },
+  {
+   "fieldname": "column_break_nnxm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_dyhx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_bbtg",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_doch",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "amount_with_discount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount (With Discount)",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: doc.parenttype == \"Package Subscription\"",
+   "fieldname": "booked_sessions",
+   "fieldtype": "Float",
+   "label": "Booked Sessions",
+   "read_only": 1
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "label": "Item Code",
+   "options": "Item",
+   "read_only_depends_on": "eval: doc.package_item_type != \"Medication\""
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: doc.parenttype == \"Package Subscription\"",
+   "fieldname": "invoiced",
+   "fieldtype": "Check",
+   "label": "Invoiced",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2024-12-01 10:42:54.758370",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Healthcare Package Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
