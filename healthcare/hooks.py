@@ -1,12 +1,12 @@
 from . import __version__ as app_version  # noqa
 
 app_name = "healthcare"
-app_title = "Marley Health"
-app_publisher = "earthians Health Informatics Pvt. Ltd."
+app_title = "Frappe Health"
+app_publisher = "forteglobalsystems"
 app_description = "Modern, Open Source HIS built on Frappe and ERPNext"
 app_icon = "octicon octicon-file-directory"
 app_color = "grey"
-app_email = "info@earthianslive.com"
+app_email = "fortestrategist@gmail.com"
 app_license = "GNU GPL V3"
 required_apps = ["erpnext"]
 app_home = "/app/healthcare"
@@ -15,7 +15,7 @@ add_to_apps_screen = [
 	{
 		"name": "healthcare",
 		"logo": "/assets/healthcare/images/healthcare.svg",
-		"title": "Marley Health",
+		"title": "Frappe Health",
 		"route": "/app/healthcare",
 		"has_permission": "erpnext.check_app_permission",
 	}
