@@ -7,7 +7,7 @@
     <p>Open source & easy-to-use hospital information system(HIS) for all healthcare organisations.</p>
   </p>
 
-  [Marley Health](https://frappehealth.com/home)
+  [Marley Health](https://marleyhealth.io)
 
  <div align="center" style="max-height: 40px;">
     <a href="https://frappecloud.com/marley/signup">
@@ -50,7 +50,7 @@ $ bench --site demo.com install-app healthcare
 
 ### Documentation
 
-Complete documentation for Marley Health is available at https://frappehealth.com/docs
+Complete documentation for Marley Health is available at https://marleyhealth.io/docs
 
 
 ### License
@@ -60,4 +60,4 @@ GNU GPL V3. See [license.txt](https://github.com/earthians/marley/blob/develop/l
 
 ### Credits
 
-Marley Health module is developed & maintained by Earthians and community contributors.
+Marley Health module is developed & maintained by [earthians](https://earthianslive.com) and community contributors.
